@@ -93,9 +93,28 @@ sed -i.bak -e "s%^address = \"tcp://0.0.0.0:1317\"%address = \"tcp://0.0.0.0:203
 sed -i -e "s/^minimum-gas-prices *=.*/minimum-gas-prices = \"0umars\"/" $HOME/.mars/config/app.toml
 
 # set peers and seeds
-SEEDS=""
-PEERS="6c855909a8bf1c12ef34baca059f5c0cdf82bc36@65.108.255.124:36656,f3dceab155a74772595ae33ee6b72165c31fd888@62.171.166.106:26656,e12bc490096d1b5f4026980f05a118c82e81df2a@85.17.6.142:26656"
-sed -i -e "s/^seeds *=.*/seeds = \"$SEEDS\"/; s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" $HOME/.mars/config/config.toml
+peers="14ba3b19424301a6bb58c27663a0323a81866d5d@134.122.82.186:26656,6c855909a8bf1c12ef34baca059f5c0cdf82bc36@65.108.255.124:36656,9847d03c789d9c87e84611ebc3d6df0e6123c0cc@91.194.30.203:10656,cec7501f438e2700573cdd9d45e7fb5116ba74b9@176.9.51.55:10256,e12bc490096d1b5f4026980f05a118c82e81df2a@85.17.6.142:26656,7342199e80976b052d8506cc5a56d1f9a1cbb486@65.21.89.54:26653,7226c00dd90cf182ca9ec9aa513f518965e7e1a4@167.235.7.34:43656,846ee4df536ddba9739d3f5eebd0139b0a9e5169@159.148.146.132:27225,719cf7e8f7640a48c782599475d4866b401f2d34@51.254.197.170:26656,fe8d614aa5899a97c11d0601ef50c3e7ce17d57b@65.108.233.109:18556"
+sed -i -e "s|^seeds *=.*|seeds = \"3f472746f46493309650e5a033076689996c8881@mars-testnet.rpc.kjnodes.com:45659\"|" $HOME/.mars/config/config.toml
+sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.mars/config/config.toml
+sed -i -e "s|^minimum-gas-prices *=.*|minimum-gas-prices = \"0umars\"|" $HOME/.mars/config/app.toml
+
+#set state sync
+   echo " If you have state sync enabled please turn it off first"
+   sleep 3
+   sudo apt update
+   sudo apt install snapd -y
+   sudo snap install lz4
+   
+   sudo systemctl stop marsd
+	cp $HOME/.mars/data/priv_validator_state.json $HOME/.mars/priv_validator_state.json.backup
+	rm -rf $HOME/.mars/data
+
+	curl -L https://snapshot.mars.indonode.net/mars-snapshot-2023-01-14.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.mars
+	mv $HOME/.mars/priv_validator_state.json.backup $HOME/.mars/data/priv_validator_state.json
+
+	sudo systemctl restart marsd && journalctl -u marsd -f --no-hostname -o cat
+
+}
 
 # config pruning
 pruning="custom"
