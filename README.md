@@ -1,7 +1,7 @@
 ## Official Links
 [Website](https://marsprotocol.io/) [Twitter](https://twitter.com/mars_protocol) [Discord](https://discord.gg/marsprotocol)
 
-## [Explorer](https://mars.explorers.guru/validators) [Explorer](https://explorer.nodestake.top/mars-testnet/staking)
+[Explorer](https://spt-explorer.vercel.app/)
 
 # Install Node Guide Mars Protocol
 ### Setting up variables
