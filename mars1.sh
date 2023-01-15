@@ -98,24 +98,6 @@ sed -i -e "s|^seeds *=.*|seeds = \"3f472746f46493309650e5a033076689996c8881@mars
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.mars/config/config.toml
 sed -i -e "s|^minimum-gas-prices *=.*|minimum-gas-prices = \"0umars\"|" $HOME/.mars/config/app.toml
 
-#set state sync
-   echo " If you have state sync enabled please turn it off first"
-   sleep 3
-   sudo apt update
-   sudo apt install snapd -y
-   sudo snap install lz4
-   
-   sudo systemctl stop marsd
-	cp $HOME/.mars/data/priv_validator_state.json $HOME/.mars/priv_validator_state.json.backup
-	rm -rf $HOME/.mars/data
-
-	curl -L https://snapshot.mars.indonode.net/mars-snapshot-2023-01-14.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.mars
-	mv $HOME/.mars/priv_validator_state.json.backup $HOME/.mars/data/priv_validator_state.json
-
-	sudo systemctl restart marsd && journalctl -u marsd -f --no-hostname -o cat
-
-}
-
 # config pruning
 pruning="custom"
 pruning_keep_recent="100"
@@ -143,6 +125,22 @@ LimitNOFILE=10000
 [Install]
 WantedBy=multi-user.target
 EOF
+
+#set state sync
+   echo " If you have state sync enabled please turn it off first"
+   sleep 3
+   sudo apt update
+   sudo apt install snapd -y
+   sudo snap install lz4
+   
+   sudo systemctl stop marsd
+	cp $HOME/.mars/data/priv_validator_state.json $HOME/.mars/priv_validator_state.json.backup
+	rm -rf $HOME/.mars/data
+
+	curl -L https://snapshot.mars.indonode.net/mars-snapshot-2023-01-14.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.mars
+	mv $HOME/.mars/priv_validator_state.json.backup $HOME/.mars/data/priv_validator_state.json
+
+	sudo systemctl restart marsd && journalctl -u marsd -f --no-hostname -o cat
 
 marsd tendermint unsafe-reset-all
 
