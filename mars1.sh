@@ -98,40 +98,41 @@ sed -i -e "s|^seeds *=.*|seeds = \"3f472746f46493309650e5a033076689996c8881@mars
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.mars/config/config.toml
 sed -i -e "s|^minimum-gas-prices *=.*|minimum-gas-prices = \"0umars\"|" $HOME/.mars/config/app.toml
 
-# config pruning
-pruning="custom"
-pruning_keep_recent="100"
-pruning_keep_every="0"
-pruning_interval="10"
-sed -i -e "s/^pruning *=.*/pruning = \"$pruning\"/" $HOME/.mars/config/app.toml
-sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"$pruning_keep_recent\"/" $HOME/.mars/config/app.toml
-sed -i -e "s/^pruning-keep-every *=.*/pruning-keep-every = \"$pruning_keep_every\"/" $HOME/.mars/config/app.toml
-sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"$pruning_interval\"/" $HOME/.mars/config/app.toml
+# Set pruning
+	sed -i -e "s|^pruning *=.*|pruning = \"custom\"|" $HOME/.mars/config/app.toml
+	sed -i -e "s|^pruning-keep-recent *=.*|pruning-keep-recent = \"100\"|" $HOME/.mars/config/app.toml
+	sed -i -e "s|^pruning-keep-every *=.*|pruning-keep-every = \"0\"|" $HOME/.mars/config/app.toml
+	sed -i -e "s|^pruning-interval *=.*|pruning-interval = \"19\"|" $HOME/.mars/config/app.toml
+
+	# Set Indexer
+	indexer="null" && \
+	sed -i -e "s/^indexer *=.*/indexer = \"$indexer\"/" $HOME/.mars/config/config.toml
+
 
 # enable prometheus
 sed -i -e "s/prometheus = false/prometheus = true/" $HOME/.mars/config/config.toml
 
-# create service
+# Create service
 sudo tee /etc/systemd/system/marsd.service > /dev/null << EOF
 [Unit]
-Description=Mars Service
+Description=mars-testnet node service
 After=network-online.target
 [Service]
 User=$USER
-ExecStart=$(which marsd) start
+ExecStart=$(which cosmovisor) run start
 Restart=on-failure
 RestartSec=10
-LimitNOFILE=10000
+LimitNOFILE=65535
+Environment="DAEMON_HOME=$HOME/.mars"
+Environment="DAEMON_NAME=marsd"
+Environment="UNSAFE_SKIP_BACKUP=true"
 [Install]
 WantedBy=multi-user.target
 EOF
 
 marsd tendermint unsafe-reset-all
 
-# start service
-sudo systemctl daemon-reload
-sudo systemctl enable marsd
-sudo systemctl start marsd
+
 
 #set state sync
    echo " If you have state sync enabled please turn it off first"
@@ -148,6 +149,12 @@ sudo systemctl start marsd
 	mv $HOME/.mars/priv_validator_state.json.backup $HOME/.mars/data/priv_validator_state.json
 
 	sudo systemctl restart marsd && journalctl -u marsd -f --no-hostname -o cat
+	
+
+	# start service
+sudo systemctl daemon-reload
+sudo systemctl enable marsd
+sudo systemctl start marsd
 break
 ;;
 
