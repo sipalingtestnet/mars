@@ -131,7 +131,11 @@ WantedBy=multi-user.target
 EOF
 
 marsd tendermint unsafe-reset-all
-
+	# start service
+sudo systemctl daemon-reload
+sudo systemctl enable marsd
+sudo systemctl start marsd
+break
 
 
 #set state sync
@@ -151,11 +155,7 @@ marsd tendermint unsafe-reset-all
 	sudo systemctl restart marsd && journalctl -u marsd -f --no-hostname -o cat
 	
 
-	# start service
-sudo systemctl daemon-reload
-sudo systemctl enable marsd
-sudo systemctl start marsd
-break
+
 ;;
 
 "Create Wallet")
