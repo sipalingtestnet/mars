@@ -126,6 +126,13 @@ LimitNOFILE=10000
 WantedBy=multi-user.target
 EOF
 
+marsd tendermint unsafe-reset-all
+
+# start service
+sudo systemctl daemon-reload
+sudo systemctl enable marsd
+sudo systemctl start marsd
+
 #set state sync
    echo " If you have state sync enabled please turn it off first"
    sleep 3
@@ -141,14 +148,6 @@ EOF
 	mv $HOME/.mars/priv_validator_state.json.backup $HOME/.mars/data/priv_validator_state.json
 
 	sudo systemctl restart marsd && journalctl -u marsd -f --no-hostname -o cat
-
-marsd tendermint unsafe-reset-all
-
-# start service
-sudo systemctl daemon-reload
-sudo systemctl enable marsd
-sudo systemctl start marsd
-
 break
 ;;
 
